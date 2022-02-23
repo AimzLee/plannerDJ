@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!-- layout 파일을 설정 -->
+<th:block th:replace="~{/layout/basic :: setContent(~{this::content} )}">
+    <!-- layout 에 출력할 내용 -->
+    <th:block th:fragment="content">
+
+        <h1 class="mt-4">Calendar</h1>
+
+        <link href="/localhost_files/main.css" rel="stylesheet">
+        <script src="/localhost_files/main.js"></script>
+
+        <style>
+            planner {
+                margin: 40px 10px;
+                padding: 0;
+                font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+                font-size: 14px;
+            }
+
+            #calendar {
+                margin: 0 auto;
+            }
+        </style>
+
+        <planner>
+            <div id="calendar" class="fc fc-media-screen fc-direction-ltr fc-theme-standard"></div>
+        </planner>
+
+        <!-- 일정 등록을 위한 모달 창 -->
+        <div class="planModal modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">일정 등록</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- title 입력 -->
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" class="form-control" name="title" placeholder="Enter 'Title' here...">
+                        </div>
+                        <!-- description 입력 -->
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea class="form-control" rows="5" id="description"
+                                      placeholder="Enter 'Description' here..."></textarea>
+                        </div>
+                        <!-- location 입력 -->
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" class="form-control" name="location"
+                                   placeholder="Enter 'Location' here...">
+                        </div>
+                        <!-- 중요도 입력 -->
+                        <div class="form-group">
+                            <label>Importance<span class="grade"></span></label>
+                            <div class='starrr'></div>
+                        </div>
+                        <div class="form-group">
+                            <label>StartDate</label>
+                            <input type="text" class="form-control" name="start">
+                        </div>
+                        <div class="form-group">
+                            <label>EndDate</label>
+                            <input type="text" class="form-control" name="end">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary planSaveBtn">Save</button>
+                        <button type="button" class="btn btn-warning modifyBtn">Modify</button>
+                        <button type="button" class="btn btn-danger removeBtn">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script th:src="@{/starrr.js}"></script>
+        <link th:href="@{/css/starrr.css}" rel="stylesheet">
+        <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css">
+
+        <script>
+            /***
+             * DB에서 가져온 자료 JSON parsing
+             * data 활용 연습! 아래의 코드는 형식에 맞지 않기 때문제 오류발생!
+             * console.log(typeof([[${result}]]));
+             * 따라서, view 화면이 아닌 <sciprt> 태그 안에서 데이터를 활용하기 위해서,
+             * 다음과 같이 억시로 JSON 형식으로 맞춘 후 작업을 이어나갈 수 밖에 없었다.
+             */
+            var list = "[[${result}]]"; //list 는 현재 String 타입
+            // 위의 자료를 Javascript 의 Object 타입의 배열로 만들기 위하여 JSON format 에 맞추어 주었다.
+            var array = list.replaceAll(", Plan(", ",{\"");
+            array = array.replaceAll(", ", "\",\"");
+            array = array.replaceAll(")", "\"}");
+            array = array.replaceAll("=", "\":\"");
+            array = array.replaceAll("Plan(", "{\"");
+            // 작업을 완료한 후 JSON parsing
+            list = JSON.parse(array); //드디어! 원하는 결과물을 얻었다!
+
+            var calendarEl = document.getElementById('calendar');
+            var grade = 0;
+            $('.starrr').starrr({
+                rating: grade,
+                change: function (e, value) {
+                    if (value) {
+                        grade = value;
+                    }
+                }
+            });
+
+            // Date format 을 맞추기 위한 함수 선언!
+            function formatTime(str) {
+                var d = new Date(str);
+                return d.getFullYear() + "-" + ((d.getMonth() + 1) > 9 ? (d.getMonth() + 1).toString() : "0" + (d.getMonth() + 1)) + "-" + (d.getDate() > 9 ? d.getDate().toString() : "0" + d.getDate().toString());
+            }
+
+            /***
+             * https://fullcalendar.io/docs/event-parsing
+             * 위의 자료를 참고해서 Plan Table의 컬럼명을 좀 수정하는 것이 좋지 않을까?
+             */
+            let today = new Date();
+            let planModal = $(".planModal");
+            let inputTitle = $('input[name="title"]');
+            let inputDescription = $('textarea[id="description"]');
+            let inputLocation = $('input[name="location"]');
+            let inputStart = $('input[name="start"]');
+            let inputEnd = $('input[name="end"]');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                initialDate: today,
+                navLinks: true, // can click day/week names to navigate views
+                selectable: true,
+                selectMirror: true,
+
+                select: function (arg) {
+                    inputTitle.val("");
+                    inputDescription.val("");
+                    inputLocation.val("");
+                    inputStart.val(arg.start);
+                    inputEnd.val(arg.end);
+                    $(".removeBtn, .modifyBtn").hide();
+                    $(".planSaveBtn").show();
+
+                    $('.planModal').modal('show');
+                },
+
+                eventClick: function (arg) {
+                    console.log(arg.event)
+
+                    inputTitle.val(arg.event.title);
+                    inputDescription.val(arg.event.description);
+                    inputLocation.val(arg.event.location);
+                    inputStart.val(arg.event.startStr);
+                    inputEnd.val(arg.event.endStr);
+
+                    $(".planSaveBtn").hide();
+                    $(".removeBtn, .modifyBtn").show();
+
+                    $('.planModal').modal('show');
+
+                    $(".removeBtn").on("click", function () {
+                        if (confirm('Are you sure you want to delete this event?')) {
+                            arg.event.remove()
+                        }
+                        //DB에서 삭제하기 위한 코드를 추가할 영역
+
+                        planModal.modal('hide');
+                    });
+                },
+
+                editable: true,
+                dayMaxEvents: true, // allow "more" link when too many events
+
+                events: list
+            });
+            calendar.render();
+
+            $(".planSaveBtn").on("click", function () {
+                var data = {
+                    title: inputTitle.val(),
+                    description: inputDescription.val(),
+                    location: inputLocation.val(),
+                    grade: grade,
+                    start: formatTime(inputStart.val()),
+                    end: formatTime(inputEnd.val())
+                };
+                $.ajax({
+                    url: '/planner/register',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "text",
+                    error: function (result) {
+                        for (key in result) {
+                            console.log("key:" + ", value: " + result.key);
+                        }
+                    },
+                    success: function (result) {
+                        console.log("result:" + result);
+                        calendar.addEvent(data);
+                    }
+                });
+                planModal.modal('hide');
+                calendar.unselect()
+            });
+
+        </script>
+
+    </th:block>
+</th:block>
