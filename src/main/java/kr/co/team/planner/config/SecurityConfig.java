@@ -36,12 +36,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         //'/' 은 로그인 여부 와 상관없이 접근 가능
         //sample/member/main 는 USER 권한이 있어야 만 접근 가능
         http.authorizeRequests()
-                .antMatchers("/").permitAll()
-                .antMatchers("/security/member/main").hasRole("USER")
-                .antMatchers("/board/register").hasRole("USER")
-                .antMatchers("/board/read").hasRole("USER")
-                .antMatchers("/board/modify").hasRole("USER")
-                .antMatchers("/security/admin/management").hasRole("ADMIN");
+                .antMatchers("/").permitAll();
+//                .antMatchers("/security/member/main").hasRole("USER")
+//                .antMatchers("/board/register").hasRole("USER")
+//                .antMatchers("/board/read").hasRole("USER")
+//                .antMatchers("/board/modify").hasRole("USER")
+//                .antMatchers("/security/admin/management").hasRole("ADMIN");
 
         //권한이 없는 경우 로그인 페이지로 이동
         http.formLogin();

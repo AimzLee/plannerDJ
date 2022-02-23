@@ -1,41 +1,26 @@
 package kr.co.team.planner.dto;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
+//from LDJ
+import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@ToString
 public class PlanDTO {
-
     private Long pno;
+    private Long priority;
     private String title;
     private String description;
     private String location;
-    private int grade;
     private String start;
     private String end;
-
-    @Builder.Default
-    private List<PlanImageDTO> imageDTOList = new ArrayList<>();
-
-    //Plan 의 평균 평점
-    private double avg;
-    //리뷰 수 jpa의 count()
-    private long reviewCnt;
-    private LocalDateTime regDate;
-    private LocalDateTime modDate;
+    private String category;
+    private String share;
+    private String writerNick; //작성자의 닉네임
+    private Long writerCode; //작성자의 code
+    private int checkListCount; //체크리스트 갯수
+    private int shareCount;// 공유한 사람 수
 }

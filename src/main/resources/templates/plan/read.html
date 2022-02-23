@@ -21,13 +21,13 @@
         </div>
 
         <div class="form-group">
-            <label>Importance</label>
-            <input type="text" class="form-control" name="importance" th:value="${dto.grade}" readonly>
+            <label>Time(start)</label>
+            <input type="text" class="form-control" name="start" th:value="${dto.start}" readonly>
         </div>
 
         <div class="form-group">
-            <label>Average Star Point</label>
-            <input type="text" class="form-control" name="avgStartPoint" th:value="${dto.avg}" readonly>
+            <label>Time(end)</label>
+            <input type="text" class="form-control" name="end" th:value="${dto.end}" readonly>
         </div>
 <!--
         <style>
@@ -68,7 +68,7 @@
 -->
         <br>
         <button type="button" class="btn btn-primary">
-            Number of Reviews <span class="badge badge-light">[[${dto.reviewCnt}]]</span>
+            Number of CheckList <span class="badge badge-light">[[${dto.checkListCount}]]</span>
         </button>
 
         <button type="button" class="btn btn-info addReviewBtn">Register review</button>
@@ -111,182 +111,163 @@
             </div>
         </div>
 
-        <!-- 원본 이미지를 위한 모달 창 -->
-        <div class="imageModal modal " tabindex="-2" role="dialog">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Image</h5>
-
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
 
-        <script th:src="@{/starrr.js}"></script>
-        <link th:href="@{/css/starrr.css}" rel="stylesheet">
-        <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css">
 
-        <script>
-            $(document).ready(function (e) {
-                var grade = 0;
-                var pno = [[${dto.pno}]];
+<!--        <script th:src="@{/starrr.js}"></script>-->
+<!--        <link th:href="@{/css/starrr.css}" rel="stylesheet">-->
+<!--        <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css">-->
 
-                $('.starrr').starrr({
-                    rating: grade,
-                    change: function (e, value) {
-                        console.log("-------------------");
-                        if (value) {
-                            console.log(value);
-                            grade = value;
-                        }
-                    }
-                });
+<!--        <script>-->
+<!--            $(document).ready(function (e) {-->
+<!--                var grade = 0;-->
+<!--                var pno = [[${dto.pno}]];-->
 
-                let reviewModal = $(".reviewModal");
-                let inputEmail = $('input[name="email"]');
-                let inputText = $('input[name="text"]');
+<!--                $('.starrr').starrr({-->
+<!--                    rating: grade,-->
+<!--                    change: function (e, value) {-->
+<!--                        console.log("-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;");-->
+<!--                        if (value) {-->
+<!--                            console.log(value);-->
+<!--                            grade = value;-->
+<!--                        }-->
+<!--                    }-->
+<!--                });-->
 
-                $(".addReviewBtn").click(function () {
-                    inputEmail.val("");
-                    inputText.val("");
-                    $(".removeBtn, .modifyBtn").hide();
-                    $(".reviewSaveBtn").show();
-                    reviewModal.modal('show');
-                });
+<!--                let reviewModal = $(".reviewModal");-->
+<!--                let inputEmail = $('input[name="email"]');-->
+<!--                let inputText = $('input[name="text"]');-->
 
-                $('.reviewSaveBtn').click(function () {
-                    var data = {pno: pno, grade: grade, text: inputText.val(), email: inputEmail.val()};
-                    console.log(data);
-                    $.ajax({
-                        url: '/reviews/' + pno,
-                        type: "POST",
-                        data: JSON.stringify(data),
-                        contentType: "application/json; charset=utf-8",
-                        dataType: "text",
-                        success: function (result) {
-                            console.log("result: " + result);
-                            self.location.reload();
-                        }
-                    })
-                    reviewModal.modal('hide');
-                });
+<!--                $(".addReviewBtn").click(function () {-->
+<!--                    inputEmail.val("");-->
+<!--                    inputText.val("");-->
+<!--                    $(".removeBtn, .modifyBtn").hide();-->
+<!--                    $(".reviewSaveBtn").show();-->
+<!--                    reviewModal.modal('show');-->
+<!--                });-->
 
-                //페이지가 열리면 바로 리뷰 데이터들을 가져와서 사용한다.
-                function getMovieReviews() {
-                    function formatTime(str) {
-                        var date = new Date(str);
-                        return date.getFullYear() + '/'
-                            + (date.getMonth() + 1) + '/'
-                            + date.getDate() + ' '
-                            + date.getHours() + ':'
-                            + date.getMinutes();
-                    }
+<!--                $('.reviewSaveBtn').click(function () {-->
+<!--                    var data = {pno: pno, grade: grade, text: inputText.val(), email: inputEmail.val()};-->
+<!--                    console.log(data);-->
+<!--                    $.ajax({-->
+<!--                        url: '/reviews/' + pno,-->
+<!--                        type: "POST",-->
+<!--                        data: JSON.stringify(data),-->
+<!--                        contentType: "application/json; charset=utf-8",-->
+<!--                        dataType: "text",-->
+<!--                        success: function (result) {-->
+<!--                            console.log("result: " + result);-->
+<!--                            self.location.reload();-->
+<!--                        }-->
+<!--                    })-->
+<!--                    reviewModal.modal('hide');-->
+<!--                });-->
 
-                    $.getJSON("/reviews/" + pno + "/list", function (arr) {
-                        var str = "";
+<!--                //페이지가 열리면 바로 리뷰 데이터들을 가져와서 사용한다.-->
+<!--                function getMovieReviews() {-->
+<!--                    function formatTime(str) {-->
+<!--                        var date = new Date(str);-->
+<!--                        return date.getFullYear() + '/'-->
+<!--                            + (date.getMonth() + 1) + '/'-->
+<!--                            + date.getDate() + ' '-->
+<!--                            + date.getHours() + ':'-->
+<!--                            + date.getMinutes();-->
+<!--                    }-->
 
-                        arr.sort(function (o1, o2) {
-                            if (formatTime(o1.modDate) < formatTime(o2.modDate)) return 1;
-                            if (formatTime(o1.modDate) > formatTime(o2.modDate)) return -1;
-                            if (formatTime(o1.modDate) == formatTime(o2.modDate)) return 0;
-                        });
+<!--                    $.getJSON("/reviews/" + pno + "/list", function (arr) {-->
+<!--                        var str = "";-->
 
-                        $.each(arr, function (idx, review) {
-                            console.log(review);
-                            str += ' <div class="card-body" data-reviewnum=' + review.reviewnum + ' data-email=' + review.email + '>';
-                            str += ' <h5>내용: <span class="card-title">' + review.text + '</span></h5>';
-                            str += ' <h6>별점: <span class="card-subtitle">' + review.grade + '</h6>';
-                            str += ' <h6>작성자: <span class="card-subtitle mb-2 text-muted">' + review.name + '</h6>';
-                            str += ' <h6>작성시각: <span class="card-subtitle mb-2 text-muted">' + formatTime(review.regDate) + '</h6>';
-                            str += ' <h6>수정시각: <span class="card-subtitle mb-2 text-muted">' + formatTime(review.modDate) + '</h6>';
-                            str += ' </div>';
-                        });
+<!--                        arr.sort(function (o1, o2) {-->
+<!--                            if (formatTime(o1.modDate) < formatTime(o2.modDate)) return 1;-->
+<!--                            if (formatTime(o1.modDate) > formatTime(o2.modDate)) return -1;-->
+<!--                            if (formatTime(o1.modDate) == formatTime(o2.modDate)) return 0;-->
+<!--                        });-->
 
-                        $(".reviewList").html(str);
-                    });
-                }
+<!--                        $.each(arr, function (idx, review) {-->
+<!--                            console.log(review);-->
+<!--                            str += ' <div class="card-body" data-reviewnum=' + review.reviewnum + ' data-email=' + review.email + '>';-->
+<!--                            str += ' <h5>내용: <span class="card-title">' + review.text + '</span></h5>';-->
+<!--                            str += ' <h6>별점: <span class="card-subtitle">' + review.grade + '</h6>';-->
+<!--                            str += ' <h6>작성자: <span class="card-subtitle mb-2 text-muted">' + review.name + '</h6>';-->
+<!--                            str += ' <h6>작성시각: <span class="card-subtitle mb-2 text-muted">' + formatTime(review.regDate) + '</h6>';-->
+<!--                            str += ' <h6>수정시각: <span class="card-subtitle mb-2 text-muted">' + formatTime(review.modDate) + '</h6>';-->
+<!--                            str += ' </div>';-->
+<!--                        });-->
 
-                getMovieReviews();
+<!--                        $(".reviewList").html(str);-->
+<!--                    });-->
+<!--                }-->
 
-                //리뷰 선택
-                var reviewnum;
-                $(".reviewList").on("click", ".card-body", function () {
-                    $(".reviewSaveBtn").hide();
-                    $(".removeBtn, .modifyBtn").show();
-                    var targetReview = $(this);
-                    reviewnum = targetReview.data("reviewnum");
-                    console.log("reviewnum: " + reviewnum);
-                    inputEmail.val(targetReview.data("email"));
-                    inputText.val(targetReview.find('.card-title').text());
-                    var grade = targetReview.find('.card-subtitle').html();
+<!--                getMovieReviews();-->
 
-                    $(".starrr a:nth-child(" + grade + ")").trigger('click');
+<!--                //리뷰 선택-->
+<!--                var reviewnum;-->
+<!--                $(".reviewList").on("click", ".card-body", function () {-->
+<!--                    $(".reviewSaveBtn").hide();-->
+<!--                    $(".removeBtn, .modifyBtn").show();-->
+<!--                    var targetReview = $(this);-->
+<!--                    reviewnum = targetReview.data("reviewnum");-->
+<!--                    console.log("reviewnum: " + reviewnum);-->
+<!--                    inputEmail.val(targetReview.data("email"));-->
+<!--                    inputText.val(targetReview.find('.card-title').text());-->
+<!--                    var grade = targetReview.find('.card-subtitle').html();-->
 
-                    $('.reviewModal').modal('show');
-                });
+<!--                    $(".starrr a:nth-child(" + grade + ")").trigger('click');-->
 
-
-                $(".modifyBtn").on("click", function () {
-                    var data = {
-                        reviewnum: reviewnum,
-                        pno: pno,
-                        grade: grade,
-                        text: inputText.val(),
-                        mid: inputEmail.val()
-                    };
-                    console.log(data);
-                    $.ajax({
-                        url: '/reviews/' + pno + "/" + reviewnum,
-                        type: "PUT",
-                        data: JSON.stringify(data),
-                        contentType: "application/json; charset=utf-8",
-                        dataType: "text",
-                        success: function (result) {
-                            console.log("result:" + result);
-                            self.location.reload();
-                        }
-                    });
-                    reviewModal.modal('hide');
-                });
-
-                $(".removeBtn").on("click", function () {
-                    var data = {reviewnum: reviewnum};
-                    console.log(data);
-                    $.ajax({
-                        url: '/reviews/' + pno + "/" + reviewnum,
-                        type: "DELETE",
-                        contentType: "application/json; charset=utf-8",
-                        dataType: "text",
-                        success: function (result) {
-                            console.log("result:" + result);
-                            self.location.reload();
-                        }
-                    });
-                    reviewModal.modal('hide');
-                });
-
-            });
+<!--                    $('.reviewModal').modal('show');-->
+<!--                });-->
 
 
-            $(".uploadResult li").click(function () {
-                var file = $(this).data('file');
-                console.log(file);
-                $('.imageModal .modal-body').html("<img style='width:100%' src='/display?filename=" + file + "&size=1' >");
-                $(".imageModal").modal("show");
-            });
+<!--                $(".modifyBtn").on("click", function () {-->
+<!--                    var data = {-->
+<!--                        reviewnum: reviewnum,-->
+<!--                        pno: pno,-->
+<!--                        grade: grade,-->
+<!--                        text: inputText.val(),-->
+<!--                        mid: inputEmail.val()-->
+<!--                    };-->
+<!--                    console.log(data);-->
+<!--                    $.ajax({-->
+<!--                        url: '/reviews/' + pno + "/" + reviewnum,-->
+<!--                        type: "PUT",-->
+<!--                        data: JSON.stringify(data),-->
+<!--                        contentType: "application/json; charset=utf-8",-->
+<!--                        dataType: "text",-->
+<!--                        success: function (result) {-->
+<!--                            console.log("result:" + result);-->
+<!--                            self.location.reload();-->
+<!--                        }-->
+<!--                    });-->
+<!--                    reviewModal.modal('hide');-->
+<!--                });-->
 
-        </script>
+<!--                $(".removeBtn").on("click", function () {-->
+<!--                    var data = {reviewnum: reviewnum};-->
+<!--                    console.log(data);-->
+<!--                    $.ajax({-->
+<!--                        url: '/reviews/' + pno + "/" + reviewnum,-->
+<!--                        type: "DELETE",-->
+<!--                        contentType: "application/json; charset=utf-8",-->
+<!--                        dataType: "text",-->
+<!--                        success: function (result) {-->
+<!--                            console.log("result:" + result);-->
+<!--                            self.location.reload();-->
+<!--                        }-->
+<!--                    });-->
+<!--                    reviewModal.modal('hide');-->
+<!--                });-->
+
+<!--            });-->
+
+
+<!--            $(".uploadResult li").click(function () {-->
+<!--                var file = $(this).data('file');-->
+<!--                console.log(file);-->
+<!--                $('.imageModal .modal-body').html("<img style='width:100%' src='/display?filename=" + file + "&size=1' >");-->
+<!--                $(".imageModal").modal("show");-->
+<!--            });-->
+
+<!--        </script>-->
 
     </th:block>
 

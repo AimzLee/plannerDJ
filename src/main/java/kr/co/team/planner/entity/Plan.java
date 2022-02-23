@@ -1,17 +1,8 @@
 package kr.co.team.planner.entity;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+//from LDJ
 import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -19,30 +10,59 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@ToString
-public class Plan extends BaseEntity {
-
+@ToString(exclude = "writer")
+public class Plan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long pno;
 
-    private String title;
-    private String description;
-    private String location;
-    private int grade;
-    private String start;
-    private String end;
+    private Long priority;
 
-    public void changeGrade(int grade){
-        this.grade = grade;
+    @Column(nullable = false)
+    private String title;
+
+    private String description;
+
+    private String location;
+
+    @Column(nullable = false)
+    private LocalDateTime start;
+
+    @Column(nullable = false)
+    private LocalDateTime end;
+
+    private String category;
+
+    @Column(length= 20, nullable = false)
+    private String share;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade= CascadeType.REMOVE)
+    // commit 시점에만 삭제
+    private User writer;
+
+    public void changePriority(Long priority){
+        this.priority=priority;
     }
     public void changeTitle(String title){
-        this.title = title;
+        this.title=title;
     }
     public void changeDescription(String description){
-        this.description = description;
+        this.description=description;
     }
     public void changeLocation(String location){
-        this.location = location;
+        this.location=location;
     }
+    public void changeStart(LocalDateTime start){
+        this.start= LocalDateTime.from(start);
+    }
+    public void changeEnd(LocalDateTime end){
+        this.end= LocalDateTime.from(end);
+    }
+    public void changeCategory(String category){
+        this.category=category;
+    }
+    public void changeShare(String share){
+        this.share=share;
+    }
+
 }
